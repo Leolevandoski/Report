@@ -13,7 +13,7 @@ import testdata.WriteTest;
 
 public class CompanyPayrollGen {
 	
-	public static String pipe = CompanyPayrollFormat.pipe();
+	public static String pipe = CompanyPayrollFormat.PIPE;
 	
 
 	public static void main(String[] args) throws IOException {
@@ -44,26 +44,35 @@ public class CompanyPayrollGen {
 			
 			String dep = null;
 			Double total = 0d;
-						
-//			Double s = rs.getDouble("SALARY");
-//			String SALARY = String.format("%.2f", s); 
-			
+			Double grandTotal = total;
+								
 			System.out.println(CompanyPayrollFormat.header());
-			while (rs.next()) {
+			
+			buffer.append(CompanyPayrollFormat.header() + "\n");
+				while (rs.next()) {
 				if(rs.getRow() == 1) {
 					dep = rs.getString("DEPARTMENT");
 					total = rs.getDouble("total");
+					grandTotal += total;
 				} else if(!rs.getString("DEPARTMENT").equals(dep)) {
 					System.out.println("TOTAL = " + total);
+					buffer.append("TOTAL " + dep + pipe + String.format("%.2f", total) + "\n"+"\n");
 					dep = rs.getString("DEPARTMENT");
 					total = rs.getDouble("total");
+					System.out.println(CompanyPayrollFormat.header());
+					buffer.append(CompanyPayrollFormat.header() + "\n");
+					grandTotal += total;
 				}	
 				System.out.println(rs.getString("NAME") + pipe + String.format("%.2f",rs.getDouble("SALARY")) + pipe + rs.getString("DEPARTMENT") );	
+				buffer.append(rs.getString("NAME") + pipe + String.format("%.2f",rs.getDouble("SALARY")) + pipe + rs.getString("DEPARTMENT")).append("\n");
 				if(rs.isLast()) {
 					System.out.println("TOTAL = " + String.format("%.2f", total));
+					buffer.append("TOTAL " + dep + pipe + String.format("%.2f", total) + "\n"+"\n");
+					grandTotal += total;
+					System.out.println("TOTAL" +pipe+ String.format("%.2f", grandTotal));
+					buffer.append("TOTAL" + pipe + String.format("%.2f", grandTotal));
+					
 				}
-				buffer.append(rs.getString("NAME") + pipe + String.format("%.2f",rs.getDouble("SALARY")) + pipe + rs.getString("DEPARTMENT")).append("\n");
-				
 				
 			}
 			WriteTest.writeInJava(buffer.toString());
